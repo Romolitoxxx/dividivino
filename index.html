@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Dividivino</title>
+<meta name="theme-color" content="#7C4DFF">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Dividivino">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --pri:#7C4DFF; --pri2:#B39DFF; --acc:#FF8A3D; --yel:#FFC93C; --grn:#2EC27E; --red:#E5484D; --blu:#3DA5FF; --pink:#FF6FAE;
+  --bg:#FFF7EC; --ink:#2B2340; --mut:#7A7190; --card:#fff;
+  --c: clamp(30px, min(8.4vw, 6.4vh), 58px);
+  --font: 'Baloo 2', 'Trebuchet MS', system-ui, sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%}
+body{font-family:var(--font);background:var(--bg);color:var(--ink);font-size:18px;
+  padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  background-image:radial-gradient(circle at 10% 10%,#FFE3C2 0 60px,transparent 61px),radial-gradient(circle at 92% 18%,#E6DDFF 0 80px,transparent 81px),radial-gradient(circle at 85% 95%,#D6F5E6 0 90px,transparent 91px);background-attachment:fixed}
+body.easy{font-family:Verdana,Tahoma,sans-serif;letter-spacing:.04em;font-size:19px}
+button{font-family:inherit;font-size:inherit;color:inherit;cursor:pointer}
+input,select,textarea{font-family:inherit;font-size:18px}
+#app{max-width:1200px;margin:0 auto;min-height:100%;padding:14px}
+h1,h2,h3{margin:.2em 0;line-height:1.15}
+h1{font-size:2rem;font-weight:800}
+h2{font-size:1.4rem;font-weight:800}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.sp{flex:1}
+.mut{color:var(--mut)}
+.small{font-size:.85em}
+.btn{border:none;border-radius:16px;padding:12px 18px;font-weight:700;background:#EFE9FF;color:var(--pri);box-shadow:0 3px 0 rgba(0,0,0,.08);transition:transform .08s}
+.btn:active{transform:translateY(2px);box-shadow:none}
+.btn.pri{background:var(--pri);color:#fff;box-shadow:0 4px 0 #5a32d1}
+.btn.acc{background:var(--acc);color:#fff;box-shadow:0 4px 0 #d46a22}
+.btn.grn{background:var(--grn);color:#fff;box-shadow:0 4px 0 #1f9a61}
+.btn.red{background:#FFE4E5;color:var(--red)}
+.btn.ghost{background:transparent;box-shadow:none;color:var(--mut)}
+.btn.big{font-size:1.35rem;padding:18px 26px;border-radius:22px}
+.btn:disabled{opacity:.45}
+.card{background:var(--card);border-radius:22px;padding:16px;box-shadow:0 6px 20px rgba(60,40,120,.08)}
+.grid{display:grid;gap:14px}
+.topbar{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.logo{display:flex;align-items:center;gap:8px;font-weight:800;font-size:1.6rem;color:var(--pri)}
+.logo svg{width:44px;height:44px}
+.av{border-radius:50%;overflow:hidden;display:inline-flex;align-items:center;justify-content:center;background:#eee;flex:none}
+.av img{width:100%;height:100%;object-fit:cover}
+.av svg{width:100%;height:100%}
+.av .emo{line-height:1}
+.students{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px}
+.stu{background:#fff;border:none;border-radius:24px;padding:16px 10px;display:flex;flex-direction:column;align-items:center;gap:8px;box-shadow:0 6px 0 #EADFFF;font-weight:800;font-size:1.2rem}
+.stu:active{transform:translateY(3px);box-shadow:0 3px 0 #EADFFF}
+.pill{display:inline-flex;align-items:center;gap:4px;background:#FFF1C9;color:#8a6200;border-radius:99px;padding:3px 12px;font-weight:700}
+.prog{height:14px;border-radius:99px;background:#EFE9FF;overflow:hidden}
+.prog>i{display:block;height:100%;background:linear-gradient(90deg,var(--grn),#7BE3B0);border-radius:99px}
+label.f{display:block;font-weight:700;margin:14px 0 6px}
+.inp{width:100%;padding:12px 14px;border-radius:14px;border:2px solid #E3DAFF;background:#fff}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg button{border:2px solid #E3DAFF;background:#fff;border-radius:12px;padding:8px 12px;font-weight:600}
+.seg button.on{background:var(--pri);border-color:var(--pri);color:#fff}
+.sect{margin-top:18px}
+.sect>h3{color:var(--pri)}
+.help{font-size:.8em;color:var(--mut);margin-top:4px}
+/* modal */
+.modal-bg{position:fixed;inset:0;background:rgba(30,20,60,.45);display:flex;align-items:center;justify-content:center;z-index:50;padding:16px}
+.modal{background:#fff;border-radius:24px;padding:20px;max-width:460px;width:100%;max-height:90vh;overflow:auto}
+.mbtns{display:flex;gap:10px;justify-content:flex-end;margin-top:16px;flex-wrap:wrap}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 18px;border-radius:14px;z-index:60;font-weight:600}
+/* PIN pad */
+.pinpad{display:grid;grid-template-columns:repeat(3,72px);gap:10px;justify-content:center;margin-top:12px}
+.pinpad button{height:64px;border-radius:18px;border:none;background:#fff;font-size:1.6rem;font-weight:800;box-shadow:0 4px 0 #EADFFF}
+.dots{display:flex;gap:10px;justify-content:center;margin:12px 0}
+.dots i{width:18px;height:18px;border-radius:50%;background:#E3DAFF}
+.dots i.on{background:var(--pri)}
+/* division */
+.divwrap{display:flex;flex-direction:column;gap:10px}
+.stepbar{min-height:58px;background:#fff;border-radius:18px;padding:8px 14px;display:flex;align-items:center;gap:12px;box-shadow:0 4px 0 #EADFFF}
+.stepchips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{padding:4px 10px;border-radius:99px;background:#F2EEFF;color:var(--mut);font-weight:700;font-size:.85em}
+.chip.on{background:var(--yel);color:var(--ink)}
+.hint{font-weight:700}
+.story{background:#E8F6FF;border-radius:16px;padding:10px 14px;font-weight:600}
+.paper{background:#fff;border-radius:14px;box-shadow:0 2px 10px rgba(0,0,0,.08);overflow:auto;padding:0;display:flex;justify-content:center;min-height:200px}
+.sheet{display:grid;position:relative;
+  background-image:linear-gradient(#DCE7F6 1px,transparent 1px),linear-gradient(90deg,#DCE7F6 1px,transparent 1px);
+  background-size:var(--c) var(--c);background-color:#fff;font-family:'Segoe UI',Roboto,Arial,sans-serif;font-variant-numeric:tabular-nums}
+body.easy .sheet{font-family:Verdana,sans-serif}
+.sheet .g{display:flex;align-items:center;justify-content:center;font-size:calc(var(--c)*.62);color:#222}
+.sheet .g.faint{color:#bbb}
+.sheet .hl{border-bottom:3px solid #333;pointer-events:none;margin-bottom:-1px}
+.sheet .vl{border-left:3px solid #333;pointer-events:none}
+.sheet .in{border:none;background:transparent;margin:3px;border-radius:6px;outline:1.5px dashed #A9B8D6;font-size:calc(var(--c)*.62);display:flex;align-items:center;justify-content:center;padding:0;color:#1d3b8a;font-weight:600}
+.sheet .in.cur{background:#FFF6D6}
+.sheet .in.sel{outline:3px solid var(--pri);background:#F1ECFF}
+.sheet .in.bad{color:var(--red);background:#FFECEC}
+.sheet .in.sh{animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-5px)}50%{transform:translateX(5px)}75%{transform:translateX(-3px)}}
+.padarea{display:flex;flex-direction:column;gap:8px}
+.numpad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.numpad button{height:clamp(48px,7vh,70px);border:none;border-radius:16px;background:#fff;font-size:1.6rem;font-weight:800;box-shadow:0 4px 0 #EADFFF}
+.numpad button:active{transform:translateY(3px);box-shadow:none}
+.numpad .ctl{background:#F2EEFF;color:var(--pri)}
+.toolbtns{display:flex;gap:8px;flex-wrap:wrap}
+.toolbtns .btn{flex:1;padding:10px 12px}
+.msg{border-radius:16px;padding:12px 14px;font-weight:700}
+.msg.ok{background:#DDF7EA;color:#16754a}
+.msg.ko{background:#FFE7E8;color:#b42328}
+.msg.info{background:#FFF4D6;color:#7a5600}
+@media (min-width:880px) and (orientation:landscape){
+  .divwrap{flex-direction:row;align-items:flex-start}
+  .divmain{flex:1;min-width:0;display:flex;flex-direction:column;gap:10px}
+  .padarea{width:300px;flex:none;position:sticky;top:10px}
+  :root{--c:clamp(36px,7.6vh,66px)}
+  .toolbtns .btn{font-size:.85em}
+}
+@media (max-width:879px), (orientation:portrait){ .divmain{display:flex;flex-direction:column;gap:10px} }
+/* tools */
+.tools-bg{position:fixed;inset:0;background:rgba(30,20,60,.35);z-index:40;display:flex;align-items:flex-end;justify-content:center}
+.tools{background:#fff;border-radius:24px 24px 0 0;padding:14px;width:100%;max-width:640px;max-height:88vh;overflow:auto}
+@media (min-width:880px) and (orientation:landscape){.tools-bg{align-items:center}.tools{border-radius:24px}}
+.ttab{display:grid;grid-template-columns:repeat(10,1fr);gap:3px;margin:10px 0}
+.ttab button{aspect-ratio:1;border:none;border-radius:8px;background:#F4F1FB;font-weight:700;font-size:clamp(12px,3.4vw,19px);padding:0}
+.ttab button.h1{background:#EBE4FF;color:var(--pri)}
+.ttab button.on{background:var(--yel);color:var(--ink)}
+/* avatar editor */
+.swatches{display:flex;flex-wrap:wrap;gap:8px}
+.sw{width:40px;height:40px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 2px #E3DAFF}
+.sw.on{box-shadow:0 0 0 3px var(--pri)}
+.opts{display:flex;flex-wrap:wrap;gap:8px}
+.opt{width:64px;height:64px;border-radius:16px;border:2px solid #E3DAFF;background:#fff;padding:4px}
+.opt.on{border-color:var(--pri);background:#F1ECFF}
+.emogrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:8px}
+.emogrid button{font-size:2.2rem;height:70px;border-radius:16px;border:2px solid #E3DAFF;background:#fff}
+.emogrid button.on{border-color:var(--pri);background:#F1ECFF}
+/* stats */
+.kpis{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
+.kpi{background:#fff;border-radius:18px;padding:12px;box-shadow:0 3px 0 #EADFFF}
+.kpi b{display:block;font-size:1.7rem;color:var(--pri)}
+.bars{display:flex;align-items:flex-end;gap:5px;height:120px;padding-top:6px}
+.bars div{flex:1;background:var(--pri2);border-radius:6px 6px 0 0;position:relative;min-height:2px}
+.bars div span{position:absolute;bottom:-20px;left:50%;transform:translateX(-50%);font-size:11px;color:var(--mut)}
+.hbar{display:flex;align-items:center;gap:8px;margin:6px 0}
+.hbar .lab{width:200px;font-size:.9em}
+.hbar .tr{flex:1;height:14px;background:#F2EEFF;border-radius:99px;overflow:hidden}
+.hbar .tr i{display:block;height:100%;background:var(--acc)}
+table.hist{width:100%;border-collapse:collapse;font-size:.9em}
+table.hist td,table.hist th{padding:6px;border-bottom:1px solid #eee;text-align:left}
+/* confetti */
+.conf{position:fixed;top:-20px;width:10px;height:16px;z-index:70;animation:fall linear forwards;border-radius:3px}
+@keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+.mascot{width:90px;height:90px}
+.warm-q{font-size:3rem;font-weight:800;text-align:center}
+.warm-a{font-size:2.4rem;font-weight:800;text-align:center;min-height:60px;background:#fff;border-radius:18px;padding:4px}
+@media print{
+  body{background:#fff}
+  .noprint,.topbar .btn{display:none!important}
+  .card,.kpi{box-shadow:none;border:1px solid #ddd}
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+'use strict';
+/* ================= UTIL ================= */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid = () => Math.random().toString(36).slice(2, 10);
+const rnd = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
+const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+const dayKey = (d = new Date()) => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+
+/* ================= ENGINE START ================= */
+function solveDiv(D, v, method) {
+  const ds = String(D).split('').map(Number), n = ds.length;
+  let i = 0, p = ds[0];
+  while (p < v && i < n - 1) { i++; p = p * 10 + ds[i]; }
+  const cells = [], acts = [], qd = [], steps = [];
+  const longM = method !== 'italiano';
+  let curRow = 0, endCol = i, row = 0;
+  while (true) {
+    const q = Math.floor(p / v), prod = q * v, r = p - prod, k = qd.length;
+    qd.push(q);
+    steps.push({ q, prod, r, p, endCol });
+    const qid = 'q' + k;
+    cells.push({ id: qid, kind: 'q', val: q, area: 'q', c: k, step: k });
+    acts.push({ kind: 'q', step: k, ids: [qid] });
+    let remRow = curRow, nextVal;
+    if (q > 0) {
+      if (longM) {
+        row++;
+        const s = String(prod), ids = [];
+        for (let j = 0; j < s.length; j++) {
+          const c = endCol - s.length + 1 + j, id = `w${row}_${c}`;
+          cells.push({ id, kind: 'prod', val: +s[j], area: 'w', r: row, c, step: k });
+          ids.push(id);
+        }
+        acts.push({ kind: 'prod', step: k, ids, row, c1: endCol - s.length + 1, c2: endCol });
+      }
+      row++; remRow = row;
+      const s = String(r), ids = [];
+      for (let j = s.length - 1; j >= 0; j--) {
+        const c = endCol - s.length + 1 + j, id = `w${row}_${c}`;
+        cells.push({ id, kind: 'rem', val: +s[j], area: 'w', r: row, c, step: k });
+        ids.push(id);
+      }
+      acts.push({ kind: 'rem', step: k, ids });
+      nextVal = r;
+    } else {
+      nextVal = p;
+    }
+    if (i < n - 1) {
+      i++;
+      const id = `w${remRow}_${i}`;
+      cells.push({ id, kind: 'down', val: ds[i], area: 'w', r: remRow, c: i, step: k });
+      acts.push({ kind: 'down', step: k, ids: [id] });
+      p = nextVal * 10 + ds[i]; endCol = i; curRow = remRow;
+    } else {
+      return { D, v, n, ds, qd, Q: Math.floor(D / v), R: D % v, cells, acts, steps, rows: row, method: longM ? 'lungo' : 'italiano' };
+    }
+  }
+}
+
+function buildDivSheet(sol) {
+  const n = sol.n, vs = String(sol.v), W = Math.max(vs.length, sol.qd.length) + 1;
+  const items = [], hl = [], vl = [], cells = [];
+  sol.ds.forEach((d, i) => items.push({ r: 0, c: 1 + i, t: String(d) }));
+  vs.split('').forEach((d, j) => items.push({ r: 0, c: n + 1 + j, t: d }));
+  hl.push({ r: 0, c1: n + 1, c2: n + W });
+  const rows = Math.max(sol.rows, 1);
+  vl.push({ c: n + 1, r1: 0, r2: rows });
+  for (const a of sol.acts) if (a.kind === 'prod') {
+    items.push({ r: a.row, c: a.c1, t: '−' });
+    hl.push({ r: a.row, c1: 1 + a.c1, c2: 1 + a.c2 });
+  }
+  for (const c of sol.cells) {
+    if (c.area === 'q') cells.push(Object.assign({}, c, { r: 1, c: n + 1 + c.c }));
+    else cells.push(Object.assign({}, c, { c: 1 + c.c }));
+  }
+  return { cols: n + 1 + W, rows: rows + 1, items, hl, vl, cells, acts: sol.acts };
+}
+
+function buildProof(sol) {
+  const { Q, v, R, D } = sol, qs = String(Q), vs = String(v), prodStr = String(Q * v);
+  const partials = vs.length > 1 ? [String(Q * (v % 10)), String(Q * Math.floor(v / 10))] : null;
+  const W = Math.max(qs.length, vs.length, prodStr.length, String(D).length, partials ? partials[1].length + 1 : 0, partials ? partials[0].length : 0) + 1;
+  const items = [], cells = [], acts = [], hl = [];
+  const given = (row, str, right) => { for (let j = 0; j < str.length; j++) items.push({ r: row, c: right - str.length + 1 + j, t: str[j] }); };
+  const input = (row, str, right, label, hint) => {
+    const ids = [];
+    for (let j = str.length - 1; j >= 0; j--) {
+      const c = right - str.length + 1 + j, id = `p${row}_${c}`;
+      cells.push({ id, kind: 'prova', val: +str[j], r: row, c });
+      ids.push(id);
+    }
+    acts.push({ kind: 'prova', ids, label, hint });
+  };
+  given(0, qs, W - 1); items.push({ r: 1, c: 0, t: '×' }); given(1, vs, W - 1); hl.push({ r: 1, c1: 0, c2: W - 1 });
+  let r;
+  if (partials) {
+    input(2, partials[0], W - 1, 'Moltiplico', `${Q} × ${v % 10} (le unità)`);
+    input(3, partials[1], W - 2, 'Moltiplico', `${Q} × ${Math.floor(v / 10)} (le decine): scrivi spostandoti di un posto a sinistra`);
+    items.push({ r: 3, c: W - 1, t: '–', faint: true });
+    items.push({ r: 3, c: 0, t: '+' });
+    hl.push({ r: 3, c1: 0, c2: W - 1 });
+    input(4, prodStr, W - 1, 'Sommo', 'Somma i due risultati in colonna');
+    r = 4;
+  } else {
+    input(2, prodStr, W - 1, 'Moltiplico', `${Q} × ${v} = ? (in colonna, da destra)`);
+    r = 2;
+  }
+  if (R > 0) {
+    items.push({ r: r + 1, c: 0, t: '+' }); given(r + 1, String(R), W - 1); hl.push({ r: r + 1, c1: 0, c2: W - 1 });
+    input(r + 2, String(D), W - 1, 'Aggiungo il resto', `${Q * v} + ${R} = ?`);
+    r += 2;
+  }
+  return { cols: W, rows: r + 1, items, hl, vl: [], cells, acts };
+}
+
+function generate(s) {
+  const n = s.dividendDigits, lo = 10 ** (n - 1), hi = 10 ** n - 1;
+  const wantR = s.remainder === 'sempre' ? true : s.remainder === 'mai' ? false : Math.random() < 0.5;
+  const wantZero = s.zero && Math.random() < 0.5;
+  const divs = (s.divisors && s.divisors.length) ? s.divisors : [2, 3, 4, 5, 6, 7, 8, 9];
+  for (let t = 0; t < 5000; t++) {
+    const v = s.divisorType === 'due' ? rnd(11, 29) : pick(divs);
+    let D;
+    if (!wantR) {
+      const qlo = Math.ceil(lo / v), qhi = Math.floor(hi / v);
+      if (qlo > qhi) continue;
+      D = v * rnd(qlo, qhi);
+    } else D = rnd(lo, hi);
+    if (D < v) continue;
+    if (wantR !== (D % v > 0)) continue;
+    const sol = solveDiv(D, v, 'lungo'), hasZero = sol.qd.includes(0);
+    if (!s.zero && hasZero) continue;
+    if (wantZero && !hasZero && t < 4000) continue;
+    if (sol.Q < 2 && t < 4500) continue;
+    return { D, v };
+  }
+  return { D: 84, v: 4 };
+}
+
+function actInfo(a, sol) {
+  if (a.kind === 'prova') return [a.label, a.hint];
+  const s = sol.steps[a.step], v = sol.v;
+  switch (a.kind) {
+    case 'q': return ['Divido', `Quante volte il ${v} sta nel ${s.p}?`];
+    case 'prod': return ['Moltiplico', `${s.q} × ${v} = ?`];
+    case 'rem': return sol.method === 'lungo' ? ['Sottraggo', `${s.p} − ${s.prod} = ?`] : ['Sottraggo', `${s.p} − (${s.q} × ${v}) = ?  Fai il calcolo a mente e scrivi il resto`];
+    case 'down': return ['Abbasso', 'Abbasso la cifra successiva del dividendo'];
+  }
+  return ['', ''];
+}
+
+function errType(cell, d) {
+  switch (cell.kind) {
+    case 'q': return cell.val === 0 ? 'zero' : (d > cell.val ? 'qAlto' : 'qBasso');
+    case 'prod': return 'tab';
+    case 'rem': return 'sott';
+    case 'down': return 'abb';
+    default: return 'prova';
+  }
+}
+/* ================= ENGINE END ================= */
+
+const ERR_LABELS = { qAlto: 'Quoziente troppo alto', qBasso: 'Quoziente troppo basso', zero: 'Zero nel quoziente dimenticato', tab: 'Moltiplicazione (tabelline)', sott: 'Sottrazione / resto', abb: 'Cifra abbassata sbagliata', prova: 'Errori nella prova' };
+
+/* ================= STORAGE ================= */
+const DB_KEY = 'dividivino_v1';
+const DEF_SETTINGS = { method: 'lungo', guide: 'alta', errorMode: 'rosso', proof: false, toolPit: true, toolTab: true, tabMode: 'scelta',
+  dividendDigits: 2, divisorType: 'uno', divisors: [2, 3, 4, 5], remainder: 'mai', zero: false,
+  dailyGoal: 5, warmup: true, stories: true, easyRead: false, rewardStars: 20, rewardText: 'Un premio a sorpresa' };
+const PRESETS = {
+  1: { dividendDigits: 2, divisorType: 'uno', divisors: [2, 3, 4, 5], remainder: 'mai', zero: false },
+  2: { dividendDigits: 3, divisorType: 'uno', divisors: [2, 3, 4, 5, 6, 7, 8, 9], remainder: 'avolte', zero: false },
+  3: { dividendDigits: 3, divisorType: 'uno', divisors: [2, 3, 4, 5, 6, 7, 8, 9], remainder: 'avolte', zero: true },
+  4: { dividendDigits: 3, divisorType: 'due', divisors: [2, 3, 4, 5, 6, 7, 8, 9], remainder: 'avolte', zero: true }
+};
+let DB = loadDB();
+function loadDB() {
+  try { const s = localStorage.getItem(DB_KEY); if (s) return JSON.parse(s); } catch (e) {}
+  return { v: 1, parent: { pin: null, recQ: '', recA: null }, students: [] };
+}
+function save() { try { localStorage.setItem(DB_KEY, JSON.stringify(DB)); } catch (e) { toast('Attenzione: impossibile salvare i dati su questo dispositivo'); } }
+function newStudent(name) {
+  return { id: uid(), name, avatar: { type: 'build', build: randomBuild() }, settings: JSON.parse(JSON.stringify(DEF_SETTINGS)),
+    stats: { stars: 0, rewardStars: 0, history: [], errors: {}, tables: {}, days: {}, warmups: [] } };
+}
+const stu = id => DB.students.find(s => s.id === id);
+async function hashStr(p) {
+  const s = 'dividivino:' + p;
+  try { const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s)); return [...new Uint8Array(b)].map(x => x.toString(16).padStart(2, '0')).join(''); }
+  catch (e) { let h = 5381; for (const ch of s) h = ((h << 5) + h + ch.charCodeAt(0)) | 0; return 'f' + h; }
+}
+
+/* ================= AVATAR ================= */
+const BG_COLS = ['#FFD166', '#7BDFF2', '#B2F7EF', '#F7A6C1', '#CDB4DB', '#A0E7A0', '#FFADAD', '#BDE0FE'];
+const BODY_COLS = ['#7C4DFF', '#FF8A3D', '#2EC27E', '#3DA5FF', '#FF6FAE', '#FFC93C', '#8D6E63', '#F4C7A1', '#C68642', '#5E4B3C'];
+const EYES = ['tondi', 'felici', 'punti'], MOUTHS = ['sorriso', 'aperta', 'lingua'], ACCS = ['nessuno', 'cappello', 'corona', 'occhiali', 'fiocco'];
+const EMOJIS = ['🐶', '🐱', '🦊', '🐼', '🐸', '🦁', '🐵', '🐰', '🐯', '🐨', '🦄', '🐙', '🐢', '🦖', '🐧', '🦉', '🐝', '🐞', '🚀', '⚽', '🌈', '🍕', '🎸', '🤖'];
+function randomBuild() { return { bg: pick(BG_COLS), body: pick(BODY_COLS), eyes: pick(EYES), mouth: pick(MOUTHS), acc: 'nessuno' }; }
+function buildSVG(b) {
+  let eyes = '';
+  if (b.eyes === 'tondi') eyes = '<circle cx="38" cy="50" r="9" fill="#fff"/><circle cx="62" cy="50" r="9" fill="#fff"/><circle cx="40" cy="52" r="4.5" fill="#222"/><circle cx="64" cy="52" r="4.5" fill="#222"/>';
+  else if (b.eyes === 'felici') eyes = '<path d="M30 52 q8 -10 16 0" stroke="#222" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M54 52 q8 -10 16 0" stroke="#222" stroke-width="4" fill="none" stroke-linecap="round"/>';
+  else eyes = '<circle cx="39" cy="51" r="5" fill="#222"/><circle cx="61" cy="51" r="5" fill="#222"/>';
+  let mouth = '';
+  if (b.mouth === 'sorriso') mouth = '<path d="M38 66 q12 12 24 0" stroke="#222" stroke-width="4" fill="none" stroke-linecap="round"/>';
+  else if (b.mouth === 'aperta') mouth = '<ellipse cx="50" cy="69" rx="9" ry="7" fill="#3a1d1d"/><ellipse cx="50" cy="72" rx="5" ry="3" fill="#ff7b8a"/>';
+  else mouth = '<path d="M38 66 q12 10 24 0" stroke="#222" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M46 70 q4 10 8 0" fill="#ff7b8a"/>';
+  let acc = '';
+  if (b.acc === 'cappello') acc = '<path d="M34 28 L50 2 L66 28 Z" fill="#FF6FAE"/><circle cx="50" cy="3" r="5" fill="#FFC93C"/>';
+  else if (b.acc === 'corona') acc = '<path d="M30 30 L32 12 L42 22 L50 8 L58 22 L68 12 L70 30 Z" fill="#FFC93C" stroke="#d9a400" stroke-width="2"/>';
+  else if (b.acc === 'occhiali') acc = '<circle cx="38" cy="51" r="11" fill="none" stroke="#222" stroke-width="3"/><circle cx="62" cy="51" r="11" fill="none" stroke="#222" stroke-width="3"/><path d="M49 51 h2" stroke="#222" stroke-width="3"/>';
+  else if (b.acc === 'fiocco') acc = '<path d="M50 24 L36 16 L36 32 Z M50 24 L64 16 L64 32 Z" fill="#E5484D"/><circle cx="50" cy="24" r="4" fill="#b42328"/>';
+  return `<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="${b.bg}"/><ellipse cx="50" cy="60" rx="34" ry="34" fill="${b.body}"/>${eyes}${mouth}${acc}</svg>`;
+}
+function avatarHTML(s, size = 64) {
+  const a = s.avatar || {};
+  let inner;
+  if (a.type === 'photo' && a.photo) inner = `<img src="${a.photo}" alt="">`;
+  else if (a.type === 'preset' && a.preset) inner = `<span class="emo" style="font-size:${size * .62}px">${a.preset}</span>`;
+  else inner = buildSVG(a.build || randomBuild());
+  return `<span class="av" style="width:${size}px;height:${size}px;${a.type === 'preset' ? 'background:#FFF1C9' : ''}">${inner}</span>`;
+}
+function mascotSVG(cls = 'mascot') {
+  return `<svg class="${cls}" viewBox="0 0 100 100"><ellipse cx="50" cy="56" rx="40" ry="38" fill="#7C4DFF"/><ellipse cx="50" cy="64" rx="26" ry="22" fill="#B39DFF"/>
+  <circle cx="36" cy="42" r="9" fill="#fff"/><circle cx="64" cy="42" r="9" fill="#fff"/><circle cx="38" cy="44" r="4.5" fill="#222"/><circle cx="66" cy="44" r="4.5" fill="#222"/>
+  <circle cx="50" cy="56" r="3.6" fill="#fff"/><rect x="38" y="63" width="24" height="5" rx="2.5" fill="#fff"/><circle cx="50" cy="75" r="3.6" fill="#fff"/>
+  <path d="M30 22 q4 -14 12 -8" stroke="#7C4DFF" stroke-width="6" fill="none" stroke-linecap="round"/><path d="M70 22 q-4 -14 -12 -8" stroke="#7C4DFF" stroke-width="6" fill="none" stroke-linecap="round"/></svg>`;
+}
+
+/* ================= UI HELPERS ================= */
+function toast(msg, ms = 2200) {
+  const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg; document.body.appendChild(t);
+  setTimeout(() => t.remove(), ms);
+}
+function modal({ title, body = '', buttons = [{ label: 'OK', cls: 'pri' }], onOpen }) {
+  return new Promise(res => {
+    const m = document.createElement('div'); m.className = 'modal-bg';
+    m.innerHTML = `<div class="modal"><h2>${title}</h2><div class="mb">${body}</div><div class="mbtns">${buttons.map((b, i) => `<button class="btn ${b.cls || ''}" data-i="${i}">${b.label}</button>`).join('')}</div></div>`;
+    document.body.appendChild(m);
+    m.querySelectorAll('[data-i]').forEach(el => el.onclick = () => {
+      const b = buttons[+el.dataset.i];
+      const out = b.collect ? b.collect(m) : (b.value !== undefined ? b.value : +el.dataset.i);
+      if (b.keepOpen && b.keepOpen(out, m)) return;
+      m.remove(); res(out);
+    });
+    if (onOpen) onOpen(m);
+  });
+}
+const confirmBox = (title, body, yes = 'Sì', cls = 'red') => modal({ title, body, buttons: [{ label: 'Annulla', value: false }, { label: yes, cls, value: true }] });
+function confetti() {
+  const cols = ['#7C4DFF', '#FF8A3D', '#FFC93C', '#2EC27E', '#3DA5FF', '#FF6FAE'];
+  for (let i = 0; i < 50; i++) {
+    const c = document.createElement('div'); c.className = 'conf';
+    c.style.left = Math.random() * 100 + 'vw'; c.style.background = pick(cols);
+    c.style.animationDuration = (1.6 + Math.random() * 1.6) + 's'; c.style.animationDelay = (Math.random() * .4) + 's';
+    document.body.appendChild(c); setTimeout(() => c.remove(), 3800);
+  }
+}
+const segHTML = (key, opts, cur) => `<div class="seg">${opts.map(([v, l]) => `<button class="${String(cur) === String(v) ? 'on' : ''}" onclick="setS('${key}', ${JSON.stringify(v).replace(/"/g, '&quot;')})">${l}</button>`).join('')}</div>`;
+
+/* ================= ROUTER ================= */
+let V = { name: 'home' };
+let parentOK = false;
+let warmTimer = null;
+function go(name, params = {}) {
+  if (warmTimer) { clearInterval(warmTimer); warmTimer = null; }
+  if (TOOLS.open) { TOOLS.open = null; drawTools(); }
+  V = Object.assign({ name }, params);
+  render(); window.scrollTo(0, 0);
+}
+function render() {
+  const s = V.sid ? stu(V.sid) : null;
+  document.body.classList.toggle('easy', !!(s && s.settings.easyRead && ['student', 'div', 'warm'].includes(V.name)));
+  const app = $('#app');
+  if (!DB.parent.pin) return app.innerHTML = setupView();
+  const views = { home: homeView, login: loginView, parent: parentView, settings: settingsView, stats: statsView, avatar: avatarView, student: studentView, div: divView, warm: warmView, data: dataView };
+  const needParent = ['parent', 'settings', 'stats', 'data'];
+  if (needParent.includes(V.name) && !parentOK) { V = { name: 'login', next: V }; }
+  app.innerHTML = (views[V.name] || homeView)();
+  if (V.name === 'div') afterDivRender();
+}
+
+/* ================= SETUP / LOGIN ================= */
+function setupView() {
+  return `<div class="card" style="max-width:520px;margin:30px auto;text-align:center">
+    ${mascotSVG()}<h1>Benvenuti in Dividivino!</h1>
+    <p class="mut">Prima di iniziare, il genitore sceglie un PIN per proteggere la sua area.</p>
+    <div style="text-align:left">
+      <label class="f">PIN genitore (4–6 cifre)</label><input id="pin1" class="inp" type="password" inputmode="numeric" maxlength="6" autocomplete="off">
+      <label class="f">Ripeti il PIN</label><input id="pin2" class="inp" type="password" inputmode="numeric" maxlength="6" autocomplete="off">
+      <label class="f">Domanda di recupero (facoltativa)</label><input id="rq" class="inp" placeholder="Es. Nome del primo gatto?">
+      <label class="f">Risposta</label><input id="ra" class="inp" autocomplete="off">
+    </div>
+    <p><button class="btn pri big" onclick="doSetup()">Inizia</button></p></div>`;
+}
+async function doSetup() {
+  const p1 = $('#pin1').value.trim(), p2 = $('#pin2').value.trim(), rq = $('#rq').value.trim(), ra = $('#ra').value.trim().toLowerCase();
+  if (!/^\d{4,6}$/.test(p1)) return toast('Il PIN deve avere da 4 a 6 cifre');
+  if (p1 !== p2) return toast('I due PIN non coincidono');
+  DB.parent.pin = await hashStr(p1);
+  DB.parent.recQ = rq && ra ? rq : '';
+  DB.parent.recA = rq && ra ? await hashStr('rec:' + ra) : null;
+  save(); parentOK = true; go('parent');
+}
+let pinBuf = '';
+function loginView() {
+  return `<div class="topbar"><button class="btn ghost" onclick="go('home')">← Indietro</button></div>
+  <div class="card" style="max-width:420px;margin:10px auto;text-align:center">
+    <h2>🔒 Area genitore</h2><p class="mut">Inserisci il PIN</p>
+    <div class="dots" id="dots">${[0, 1, 2, 3, 4, 5].map(i => `<i class="${i < pinBuf.length ? 'on' : ''}"></i>`).join('')}</div>
+    <div class="pinpad">${[1, 2, 3, 4, 5, 6, 7, 8, 9].map(d => `<button onclick="pinKey('${d}')">${d}</button>`).join('')}<button onclick="pinKey('del')">⌫</button><button onclick="pinKey('0')">0</button><button onclick="pinKey('ok')" style="background:var(--pri);color:#fff">OK</button></div>
+    ${DB.parent.recQ ? `<p><button class="btn ghost small" onclick="recoverPin()">PIN dimenticato?</button></p>` : ''}
+  </div>`;
+}
+async function pinKey(k) {
+  if (k === 'del') pinBuf = pinBuf.slice(0, -1);
+  else if (k === 'ok') {
+    if ((await hashStr(pinBuf)) === DB.parent.pin) { parentOK = true; pinBuf = ''; const nx = V.next || { name: 'parent' }; go(nx.name, nx); return; }
+    pinBuf = ''; toast('PIN errato');
+  } else if (pinBuf.length < 6) pinBuf += k;
+  $('#dots').innerHTML = [0, 1, 2, 3, 4, 5].map(i => `<i class="${i < pinBuf.length ? 'on' : ''}"></i>`).join('');
+}
+async function recoverPin() {
+  const ans = await modal({ title: 'Recupero PIN', body: `<p>${esc(DB.parent.recQ)}</p><input id="recA" class="inp" autocomplete="off">`,
+    buttons: [{ label: 'Annulla', value: null }, { label: 'Verifica', cls: 'pri', collect: m => m.querySelector('#recA').value.trim().toLowerCase() }] });
+  if (ans == null) return;
+  if ((await hashStr('rec:' + ans)) !== DB.parent.recA) return toast('Risposta non corretta');
+  parentOK = true; toast('Risposta corretta: scegli un nuovo PIN'); go('parent'); changePin(true);
+}
+async function changePin(skipOld) {
+  const r = await modal({ title: 'Nuovo PIN', body: `<label class="f">Nuovo PIN (4–6 cifre)</label><input id="np1" class="inp" type="password" inputmode="numeric" maxlength="6"><label class="f">Ripeti</label><input id="np2" class="inp" type="password" inputmode="numeric" maxlength="6">`,
+    buttons: [{ label: 'Annulla', value: null }, { label: 'Salva', cls: 'pri', collect: m => [m.querySelector('#np1').value.trim(), m.querySelector('#np2').value.trim()] }] });
+  if (!r) return;
+  if (!/^\d{4,6}$/.test(r[0]) || r[0] !== r[1]) return toast('PIN non valido o non coincidente');
+  DB.parent.pin = await hashStr(r[0]); save(); toast('PIN aggiornato');
+}
+
+/* ================= HOME ================= */
+function homeView() {
+  return `<div class="topbar"><div class="logo">${mascotSVG('')}Dividivino</div><span class="sp"></span>
+    <button class="btn" onclick="go('parent')">🔒 Genitore</button></div>
+    <h2 style="margin:10px 0 14px">Chi gioca oggi?</h2>
+    ${DB.students.length ? `<div class="students">${DB.students.map(s => `<button class="stu" onclick="go('student',{sid:'${s.id}'})">${avatarHTML(s, 96)}<span>${esc(s.name)}</span><span class="pill">⭐ ${s.stats.stars}</span></button>`).join('')}</div>`
+      : `<div class="card" style="text-align:center"><p>Non ci sono ancora studenti.</p><p class="mut">Il genitore può aggiungerli dalla sua area.</p><button class="btn pri" onclick="go('parent')">Vai all'area genitore</button></div>`}`;
+}
+
+/* ================= PARENT ================= */
+function todayCount(s) { return s.stats.days[dayKey()] || 0; }
+function parentView() {
+  return `<div class="topbar"><h1>Area genitore</h1><span class="sp"></span><button class="btn" onclick="parentOK=false;go('home')">Esci 🔒</button></div>
+  <div class="grid">
+    ${DB.students.map(s => {
+      const st = s.settings, reward = s.stats.rewardStars >= st.rewardStars;
+      return `<div class="card"><div class="row">${avatarHTML(s, 64)}<div><h2>${esc(s.name)}</h2>
+        <div class="mut small">Metodo ${st.method === 'lungo' ? 'lungo' : 'italiano'} · Oggi ${todayCount(s)}/${st.dailyGoal} · ⭐ ${s.stats.stars}</div></div><span class="sp"></span></div>
+        ${reward ? `<div class="msg info" style="margin-top:10px">🎁 Premio raggiunto: <b>${esc(st.rewardText)}</b> <button class="btn grn" style="margin-left:8px" onclick="giveReward('${s.id}')">Premio consegnato</button></div>` : ''}
+        <div class="row" style="margin-top:12px">
+          <button class="btn pri" onclick="go('stats',{sid:'${s.id}'})">📊 Statistiche</button>
+          <button class="btn" onclick="go('settings',{sid:'${s.id}'})">⚙️ Impostazioni</button>
+          <button class="btn" onclick="go('avatar',{sid:'${s.id}',back:'parent'})">🙂 Avatar</button>
+          <button class="btn red" onclick="delStudent('${s.id}')">Elimina</button>
+        </div></div>`;
+    }).join('')}
+    <button class="btn acc big" onclick="addStudent()">＋ Aggiungi studente</button>
+    <div class="card"><h2>Dati e sicurezza</h2><div class="row" style="margin-top:8px">
+      <button class="btn" onclick="go('data')">💾 Esporta / Importa</button>
+      <button class="btn" onclick="changePin()">🔑 Cambia PIN</button></div></div>
+  </div>`;
+}
+async function addStudent() {
+  const name = await modal({ title: 'Nuovo studente', body: `<label class="f">Nome</label><input id="nn" class="inp" maxlength="20" autocomplete="off">`,
+    buttons: [{ label: 'Annulla', value: null }, { label: 'Aggiungi', cls: 'pri', collect: m => m.querySelector('#nn').value.trim() }],
+    onOpen: m => setTimeout(() => m.querySelector('#nn').focus(), 50) });
+  if (!name) return;
+  const s = newStudent(name); DB.students.push(s); save();
+  go('settings', { sid: s.id });
+}
+async function delStudent(id) {
+  const s = stu(id);
+  if (await confirmBox('Eliminare ' + esc(s.name) + '?', 'Verranno cancellati anche tutti i progressi. Non si può annullare.', 'Elimina')) {
+    DB.students = DB.students.filter(x => x.id !== id); save(); render();
+  }
+}
+function giveReward(id) { const s = stu(id); s.stats.rewardStars = 0; save(); confetti(); render(); }
+
+/* ---- settings ---- */
+function setS(key, val) {
+  const s = stu(V.sid);
+  if (key === 'preset') Object.assign(s.settings, JSON.parse(JSON.stringify(PRESETS[val])));
+  else if (key === 'divisor') {
+    const d = s.settings.divisors, i = d.indexOf(val);
+    if (i >= 0) { if (d.length > 1) d.splice(i, 1); } else d.push(val);
+    d.sort((a, b) => a - b);
+  } else s.settings[key] = val;
+  save(); const y = window.scrollY; render(); window.scrollTo(0, y);
+}
+function settingsView() {
+  const s = stu(V.sid), st = s.settings;
+  return `<div class="topbar"><button class="btn ghost" onclick="go('parent')">← Indietro</button><h2>Impostazioni di ${esc(s.name)}</h2></div>
+  <div class="card">
+    <label class="f">Nome</label><input class="inp" value="${esc(s.name)}" maxlength="20" onchange="stu(V.sid).name=this.value.trim()||stu(V.sid).name;save()">
+    <div class="sect"><h3>Metodo</h3>${segHTML('method', [['lungo', 'Lungo (sottrazioni scritte)'], ['italiano', 'Italiano (sottrazioni a mente)']], st.method)}
+      <div class="help">Si parte dal lungo; passa all'italiano quando lo ritieni pronto.</div></div>
+    <div class="sect"><h3>Difficoltà</h3>
+      <div class="seg">${[1, 2, 3, 4].map(l => `<button onclick="setS('preset',${l})">Livello ${l}</button>`).join('')}</div>
+      <div class="help">1: due cifre, senza resto · 2: tre cifre, con resto · 3: anche zero nel quoziente · 4: divisore a due cifre</div>
+      <label class="f">Cifre del dividendo</label>${segHTML('dividendDigits', [[2, '2'], [3, '3'], [4, '4']], st.dividendDigits)}
+      <label class="f">Divisore</label>${segHTML('divisorType', [['uno', 'Una cifra'], ['due', 'Due cifre (11–29)']], st.divisorType)}
+      ${st.divisorType === 'uno' ? `<label class="f">Divisori ammessi</label><div class="seg">${[2, 3, 4, 5, 6, 7, 8, 9].map(d => `<button class="${st.divisors.includes(d) ? 'on' : ''}" onclick="setS('divisor',${d})">${d}</button>`).join('')}</div>` : ''}
+      <label class="f">Resto</label>${segHTML('remainder', [['mai', 'Mai'], ['avolte', 'A volte'], ['sempre', 'Sempre']], st.remainder)}
+      <label class="f">Zero nel quoziente</label>${segHTML('zero', [[false, 'No'], [true, 'Sì']], st.zero)}
+    </div>
+    <div class="sect"><h3>Aiuti ed errori</h3>
+      <label class="f">Guida</label>${segHTML('guide', [['alta', 'Completa (passo + suggerimento)'], ['media', 'Solo il passo'], ['nessuna', 'Nessuna']], st.guide)}
+      <label class="f">Quando sbaglia una cifra</label>${segHTML('errorMode', [['blocco', 'Blocco subito'], ['rosso', 'Rosso, ma continua'], ['fine', 'Avviso solo alla fine']], st.errorMode)}
+      <label class="f">Prova</label>${segHTML('proof', [[false, 'Facoltativa'], [true, 'Obbligatoria']], st.proof)}
+    </div>
+    <div class="sect"><h3>Strumenti</h3>
+      <label class="f">Tavola pitagorica</label>${segHTML('toolPit', [[true, 'Attiva'], [false, 'Disattiva']], st.toolPit)}
+      <label class="f">Tabella 0–99</label>${segHTML('toolTab', [[true, 'Attiva'], [false, 'Disattiva']], st.toolTab)}
+      ${st.toolTab ? `<label class="f">Toccando un numero della tabella 0–99…</label>${segHTML('tabMode', [['scelta', 'Si evidenzia solo quel numero'], ['multipli', 'Si illuminano i suoi multipli']], st.tabMode)}` : ''}
+    </div>
+    <div class="sect"><h3>Motivazione</h3>
+      <label class="f">Obiettivo giornaliero (divisioni)</label><input class="inp" type="number" min="1" max="50" value="${st.dailyGoal}" onchange="setS('dailyGoal',Math.max(1,+this.value||1))">
+      <label class="f">Stelle per il premio</label><input class="inp" type="number" min="1" max="500" value="${st.rewardStars}" onchange="setS('rewardStars',Math.max(1,+this.value||1))">
+      <label class="f">Premio</label><input class="inp" value="${esc(st.rewardText)}" maxlength="60" onchange="setS('rewardText',this.value)">
+      <label class="f">Riscaldamento tabelline (1 minuto)</label>${segHTML('warmup', [[true, 'Sì'], [false, 'No']], st.warmup)}
+      <label class="f">Problemi con una storia</label>${segHTML('stories', [[true, 'Sì'], [false, 'No']], st.stories)}
+    </div>
+    <div class="sect"><h3>Lettura</h3>${segHTML('easyRead', [[false, 'Normale'], [true, 'Facilitata (più spaziata)']], st.easyRead)}</div>
+  </div>`;
+}
+
+/* ---- stats ---- */
+function streak(s) {
+  let n = 0; const d = new Date();
+  if (!s.stats.days[dayKey(d)]) d.setDate(d.getDate() - 1);
+  while (s.stats.days[dayKey(d)]) { n++; d.setDate(d.getDate() - 1); }
+  return n;
+}
+function statsView() {
+  const s = stu(V.sid), h = s.stats.history, N = h.length;
+  const perfect = h.filter(x => x.perfect).length;
+  const avgT = N ? Math.round(h.reduce((a, x) => a + x.ms, 0) / N / 1000) : 0;
+  const withTool = h.filter(x => x.tools && (x.tools.pit || x.tools.tab)).length;
+  const proofs = h.filter(x => x.proof);
+  const errs = s.stats.errors, maxE = Math.max(1, ...Object.values(errs));
+  const tabs = Object.entries(s.stats.tables).map(([k, o]) => ({ k, ...o, rate: o.ko / (o.ok + o.ko) })).filter(x => x.ko > 0).sort((a, b) => b.rate - a.rate || b.ko - a.ko).slice(0, 8);
+  const days = []; const d = new Date(); d.setDate(d.getDate() - 13);
+  for (let i = 0; i < 14; i++) { days.push([d.getDate(), s.stats.days[dayKey(d)] || 0]); d.setDate(d.getDate() + 1); }
+  const maxD = Math.max(1, ...days.map(x => x[1]));
+  const w = s.stats.warmups.slice(-5);
+  return `<div class="topbar"><button class="btn ghost noprint" onclick="go('parent')">← Indietro</button>${avatarHTML(s, 48)}<h2>Statistiche di ${esc(s.name)}</h2><span class="sp"></span><button class="btn noprint" onclick="try{window.print()}catch(e){toast('Stampa non disponibile qui')}">🖨️ Report PDF</button></div>
+  <div class="kpis">
+    <div class="kpi"><b>${N}</b>divisioni totali</div>
+    <div class="kpi"><b>${todayCount(s)}/${s.settings.dailyGoal}</b>oggi</div>
+    <div class="kpi"><b>${N ? Math.round(perfect / N * 100) : 0}%</b>senza errori</div>
+    <div class="kpi"><b>${Math.floor(avgT / 60)}:${String(avgT % 60).padStart(2, '0')}</b>tempo medio</div>
+    <div class="kpi"><b>${streak(s)}</b>giorni di fila</div>
+    <div class="kpi"><b>⭐ ${s.stats.stars}</b>stelle</div>
+    <div class="kpi"><b>${N ? Math.round(withTool / N * 100) : 0}%</b>con strumenti</div>
+    <div class="kpi"><b>${proofs.length ? Math.round(proofs.filter(x => x.proof === 'ok').length / proofs.length * 100) + '%' : '–'}</b>prove riuscite</div>
+  </div>
+  <div class="card sect"><h3>Ultimi 14 giorni</h3><div class="bars" style="margin-bottom:24px">${days.map(([dd, c]) => `<div style="height:${c / maxD * 100}%" title="${c}"><span>${dd}</span></div>`).join('')}</div></div>
+  <div class="card sect"><h3>Tipi di errore</h3>${Object.keys(ERR_LABELS).map(k => `<div class="hbar"><span class="lab">${ERR_LABELS[k]}</span><span class="tr"><i style="width:${(errs[k] || 0) / maxE * 100}%"></i></span><b>${errs[k] || 0}</b></div>`).join('')}</div>
+  <div class="card sect"><h3>Tabelline da ripassare</h3>${tabs.length ? tabs.map(t => `<div class="hbar"><span class="lab">${t.k}</span><span class="tr"><i style="width:${t.rate * 100}%;background:var(--red)"></i></span><b>${t.ko}/${t.ok + t.ko}</b></div>`).join('') : '<p class="mut">Nessuna tabellina critica, per ora.</p>'}
+    ${w.length ? `<p class="mut small">Riscaldamenti recenti: ${w.map(x => `${x.correct}/${x.total}`).join(' · ')}</p>` : ''}</div>
+  <div class="card sect"><h3>Ultime divisioni</h3>${N ? `<div style="overflow-x:auto"><table class="hist"><tr><th>Data</th><th>Divisione</th><th>Metodo</th><th>Tempo</th><th>Errori</th><th>Prova</th></tr>
+    ${h.slice(-15).reverse().map(x => { const ne = Object.values(x.errors).reduce((a, b) => a + b, 0); return `<tr><td>${new Date(x.t).toLocaleDateString('it-IT')}</td><td>${x.D} : ${x.v} = ${x.Q}${x.R ? ' r ' + x.R : ''}</td><td>${x.method}</td><td>${Math.round(x.ms / 1000)}s</td><td>${ne ? ne : '✔'}</td><td>${x.proof === 'ok' ? '✔' : x.proof === 'ko' ? '✗' : '–'}</td></tr>`; }).join('')}</table></div>` : '<p class="mut">Ancora nessuna divisione.</p>'}</div>`;
+}
+
+/* ---- data ---- */
+function dataView() {
+  return `<div class="topbar"><button class="btn ghost" onclick="go('parent')">← Indietro</button><h2>Esporta / Importa</h2></div>
+  <div class="card"><h3>Esporta</h3><p class="mut">Salva un file con tutti i profili e i progressi, per esempio per spostarli su un altro dispositivo.</p>
+    <div class="row"><button class="btn pri" onclick="exportFile()">💾 Scarica il file</button><button class="btn" onclick="copyExport()">📋 Copia come testo</button></div></div>
+  <div class="card sect"><h3>Importa</h3><p class="mut">Attenzione: l'importazione <b>sostituisce</b> tutti i dati di questo dispositivo, PIN compreso.</p>
+    <input type="file" id="impf" accept=".json,application/json" class="inp" onchange="importFile(this)">
+    <label class="f">…oppure incolla il testo</label><textarea id="impt" class="inp" rows="4"></textarea>
+    <p><button class="btn" onclick="importText()">Importa dal testo</button></p></div>`;
+}
+function exportFile() {
+  try {
+    const blob = new Blob([JSON.stringify(DB)], { type: 'application/json' }), url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = `dividivino-backup-${dayKey()}.json`;
+    document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 3000);
+    toast('File creato. Se non lo trovi, usa "Copia come testo"');
+  } catch (e) { toast('Download non disponibile: usa "Copia come testo"'); }
+}
+async function copyExport() {
+  try { await navigator.clipboard.writeText(JSON.stringify(DB)); toast('Dati copiati negli appunti'); }
+  catch (e) { modal({ title: 'Copia questi dati', body: `<textarea class="inp" rows="8" readonly>${esc(JSON.stringify(DB))}</textarea>` }); }
+}
+function importFile(inp) { const f = inp.files[0]; if (!f) return; const r = new FileReader(); r.onload = () => doImport(r.result); r.readAsText(f); }
+function importText() { doImport($('#impt').value); }
+async function doImport(txt) {
+  let d; try { d = JSON.parse(txt); } catch (e) { return toast('File non valido'); }
+  if (!d || !d.parent || !Array.isArray(d.students)) return toast('File non valido');
+  if (!await confirmBox('Sostituire i dati?', `Verranno importati ${d.students.length} studenti. I dati attuali saranno sovrascritti.`, 'Importa', 'pri')) return;
+  DB = d; save(); parentOK = false; toast('Dati importati'); go('home');
+}
+
+/* ================= AVATAR EDITOR ================= */
+function avatarView() {
+  const s = stu(V.sid), a = s.avatar; a.build = a.build || randomBuild();
+  const tab = V.tab || (a.type === 'photo' ? 'foto' : a.type === 'preset' ? 'scegli' : 'costruisci');
+  const b = a.build, setB = (k, v) => `avSet('build','${k}','${v}')`;
+  const optRow = (k, list) => `<div class="opts">${list.map(o => `<button class="opt ${b[k] === o ? 'on' : ''}" onclick="${setB(k, o)}" title="${o}">${buildSVG(Object.assign({}, b, { [k]: o }))}</button>`).join('')}</div>`;
+  return `<div class="topbar"><button class="btn ghost" onclick="go('${V.back || 'student'}',{sid:'${s.id}'})">← Fatto</button><h2>Il mio avatar</h2></div>
+  <div class="card" style="text-align:center">${avatarHTML(s, 140)}<h2>${esc(s.name)}</h2>
+    <div class="seg" style="justify-content:center">${[['costruisci', '🎨 Costruisci'], ['scegli', '🐶 Scegli'], ['foto', '📷 Foto']].map(([k, l]) => `<button class="${tab === k ? 'on' : ''}" onclick="V.tab='${k}';render()">${l}</button>`).join('')}</div></div>
+  <div class="card sect">${tab === 'costruisci' ? `
+    <label class="f">Sfondo</label><div class="swatches">${BG_COLS.map(c => `<button class="sw ${b.bg === c ? 'on' : ''}" style="background:${c}" onclick="${setB('bg', c)}"></button>`).join('')}</div>
+    <label class="f">Colore</label><div class="swatches">${BODY_COLS.map(c => `<button class="sw ${b.body === c ? 'on' : ''}" style="background:${c}" onclick="${setB('body', c)}"></button>`).join('')}</div>
+    <label class="f">Occhi</label>${optRow('eyes', EYES)}
+    <label class="f">Bocca</label>${optRow('mouth', MOUTHS)}
+    <label class="f">Accessorio</label>${optRow('acc', ACCS)}`
+    : tab === 'scegli' ? `<div class="emogrid">${EMOJIS.map(e => `<button class="${a.type === 'preset' && a.preset === e ? 'on' : ''}" onclick="avSet('preset','${e}')">${e}</button>`).join('')}</div>`
+    : `<p class="mut">Scegli una foto dalla galleria o scattane una.</p><input type="file" accept="image/*" class="inp" onchange="avPhoto(this)">`}</div>`;
+}
+function avSet(type, k, v) {
+  const s = stu(V.sid);
+  if (type === 'build') { s.avatar.type = 'build'; s.avatar.build[k] = v; }
+  else if (type === 'preset') { s.avatar.type = 'preset'; s.avatar.preset = k; }
+  save(); const y = window.scrollY; render(); window.scrollTo(0, y);
+}
+function avPhoto(inp) {
+  const f = inp.files[0]; if (!f) return;
+  const img = new Image(), url = URL.createObjectURL(f);
+  img.onload = () => {
+    const S = 192, cv = document.createElement('canvas'); cv.width = cv.height = S;
+    const m = Math.min(img.width, img.height), ctx = cv.getContext('2d');
+    ctx.drawImage(img, (img.width - m) / 2, (img.height - m) / 2, m, m, 0, 0, S, S);
+    const s = stu(V.sid); s.avatar.type = 'photo'; s.avatar.photo = cv.toDataURL('image/jpeg', .82);
+    URL.revokeObjectURL(url); save(); render();
+  };
+  img.onerror = () => toast('Immagine non leggibile');
+  img.src = url;
+}
+
+/* ================= STUDENT HOME ================= */
+function studentView() {
+  const s = stu(V.sid); if (!s) return homeView();
+  const st = s.settings, tc = todayCount(s), lvl = Math.floor(s.stats.stars / 10) + 1;
+  const rw = Math.min(1, s.stats.rewardStars / st.rewardStars);
+  return `<div class="topbar"><button class="btn ghost" onclick="go('home')">← Cambia giocatore</button><span class="sp"></span><span class="pill">⭐ ${s.stats.stars}</span></div>
+  <div class="card" style="text-align:center">
+    <button style="border:none;background:none;padding:0" onclick="go('avatar',{sid:'${s.id}',back:'student'})">${avatarHTML(s, 120)}</button>
+    <h1>Ciao ${esc(s.name)}!</h1><div class="mut">Livello ${lvl} · ${streak(s)} giorni di fila 🔥</div>
+    <div style="max-width:420px;margin:14px auto 4px;text-align:left"><div class="row small"><b>Obiettivo di oggi</b><span class="sp"></span>${Math.min(tc, st.dailyGoal)}/${st.dailyGoal}</div><div class="prog"><i style="width:${Math.min(100, tc / st.dailyGoal * 100)}%"></i></div></div>
+    <div style="max-width:420px;margin:10px auto;text-align:left"><div class="row small"><b>🎁 ${esc(st.rewardText)}</b><span class="sp"></span>${Math.min(s.stats.rewardStars, st.rewardStars)}/${st.rewardStars} ⭐</div><div class="prog"><i style="width:${rw * 100}%;background:linear-gradient(90deg,var(--yel),var(--acc))"></i></div></div>
+    ${rw >= 1 ? `<div class="msg info">Hai raggiunto il premio! Chiamalo al genitore 🎉</div>` : ''}
+    <div class="grid" style="max-width:420px;margin:18px auto 0">
+      ${st.warmup ? `<button class="btn acc big" onclick="startWarm()">🔥 Riscaldamento tabelline</button>` : ''}
+      <button class="btn pri big" onclick="startDiv()">➗ Nuova divisione</button>
+    </div>
+  </div>`;
+}
+
+/* ================= DIVISION ================= */
+let CUR = null; // current exercise
+let TOOLS = { open: null, pit: new Set(), tab: new Set(), base: null };
+const STORIES = [
+  ['figurine', 'amici', 'Quante figurine riceve ogni amico?'], ['caramelle', 'sacchetti', 'Quante caramelle vanno in ogni sacchetto?'],
+  ['pastelli', 'astucci', 'Quanti pastelli in ogni astuccio?'], ['biglie', 'bambini', 'Quante biglie per ogni bambino?'],
+  ['mele', 'cestini', 'Quante mele in ogni cestino?'], ['libri', 'scaffali', 'Quanti libri su ogni scaffale?'], ['carte', 'giocatori', 'Quante carte per ogni giocatore?']
+];
+function newSheetState(sh, sol, kind) {
+  const order = sh.acts.flatMap(a => a.ids);
+  return { sh, sol, kind, values: {}, wrong: {}, logged: {}, order, sel: order[0], msg: null, done: false };
+}
+function startDiv() {
+  const s = stu(V.sid), st = s.settings;
+  const { D, v } = generate(st);
+  const sol = solveDiv(D, v, st.method);
+  let story = null;
+  if (st.stories && Math.random() < 0.3) { const [o, g, q] = pick(STORIES); story = `Hai ${D} ${o} da dividere in parti uguali fra ${v} ${g}. ${q}${D % v ? ' Quante ne avanzano?' : ''}`; }
+  CUR = { sid: s.id, sol, story, start: Date.now(), errors: {}, tools: { pit: 0, tab: 0 }, rec: null, phase: 'div' };
+  CUR.S = newSheetState(buildDivSheet(sol), sol, 'div');
+  go('div', { sid: s.id });
+}
+function startProof() {
+  CUR.phase = 'proof'; CUR.proofErrors = 0;
+  CUR.S = newSheetState(buildProof(CUR.sol), CUR.sol, 'proof');
+  render();
+}
+function cellDone(S, c) { return S.sh.errMode === 'fine' ? S.values[c.id] != null : S.values[c.id] === c.val; }
+function divView() {
+  const s = stu(V.sid), st = s.settings;
+  if (!CUR) return studentView();
+  return `<div class="topbar"><button class="btn ghost" onclick="leaveDiv()">← Esci</button>${avatarHTML(s, 40)}
+    <h2>${CUR.phase === 'proof' ? 'Prova' : `${CUR.sol.D} : ${CUR.sol.v}`}</h2><span class="sp"></span><span class="pill">⭐ ${s.stats.stars}</span></div>
+  <div class="divwrap"><div class="divmain">
+    ${CUR.story && CUR.phase === 'div' ? `<div class="story">📖 ${esc(CUR.story)}</div>` : ''}
+    <div id="stepbar"></div>
+    <div class="paper" id="paper"></div>
+    <div id="msgbox"></div>
+  </div>
+  <div class="padarea">
+    <div class="toolbtns">${st.toolPit ? `<button class="btn" onclick="openTool('pit')">✖️ Tavola pitagorica</button>` : ''}${st.toolTab ? `<button class="btn" onclick="openTool('tab')">🔢 Tabella 0–99</button>` : ''}</div>
+    <div class="numpad" id="numpad">${[1, 2, 3, 4, 5, 6, 7, 8, 9].map(d => `<button onclick="press(${d})">${d}</button>`).join('')}
+      <button class="ctl" onclick="press('del')">⌫</button><button onclick="press(0)">0</button><button class="ctl" onclick="press('next')">▶</button></div>
+  </div></div>`;
+}
+function afterDivRender() { renderSheet(); }
+function sheetHTML(S) {
+  const sh = S.sh, st = stu(CUR.sid).settings, mode = st.errorMode, guide = st.guide;
+  const curAct = S.done ? null : sh.acts.find(a => a.ids.some(id => !cellDone(S, sh.cells.find(c => c.id === id))));
+  const curIds = new Set(guide !== 'nessuna' && curAct ? curAct.ids : []);
+  let h = `<div class="sheet" style="grid-template-columns:repeat(${sh.cols + 2},var(--c));grid-template-rows:repeat(${sh.rows + 3},var(--c))">`;
+  for (const it of sh.items) h += `<div class="g ${it.faint ? 'faint' : ''}" style="grid-row:${it.r + 2};grid-column:${it.c + 2}">${esc(it.t)}</div>`;
+  for (const l of sh.hl) h += `<div class="hl" style="grid-row:${l.r + 2};grid-column:${l.c1 + 2}/${l.c2 + 3}"></div>`;
+  for (const l of sh.vl) h += `<div class="vl" style="grid-row:${l.r1 + 2}/${l.r2 + 3};grid-column:${l.c + 2}"></div>`;
+  for (const c of sh.cells) {
+    const v = S.values[c.id];
+    const cls = ['in', curIds.has(c.id) ? 'cur' : '', S.sel === c.id ? 'sel' : '', mode !== 'fine' && S.wrong[c.id] ? 'bad' : ''].join(' ');
+    h += `<button class="${cls}" data-id="${c.id}" style="grid-row:${c.r + 2};grid-column:${c.c + 2}">${v ?? ''}</button>`;
+  }
+  return { html: h + '</div>', curAct };
+}
+function renderSheet() {
+  const S = CUR.S, st = stu(CUR.sid).settings;
+  S.sh.errMode = st.errorMode;
+  const { html, curAct } = sheetHTML(S);
+  const paper = $('#paper'); paper.innerHTML = html;
+  paper.querySelectorAll('.in').forEach(el => el.onclick = () => { if (S.done) return; S.sel = el.dataset.id; renderSheet(); });
+  // step bar
+  let sb = '';
+  if (S.done) sb = `<span class="hint">${CUR.phase === 'proof' ? 'Prova completata!' : 'Divisione completata!'}</span>`;
+  else if (st.guide !== 'nessuna' && curAct) {
+    const [lab, hint] = actInfo(curAct, CUR.sol);
+    const names = CUR.phase === 'proof' ? [] : (st.method === 'lungo' ? ['Divido', 'Moltiplico', 'Sottraggo', 'Abbasso'] : ['Divido', 'Sottraggo', 'Abbasso']);
+    sb = (names.length ? `<div class="stepchips">${names.map(n => `<span class="chip ${n === lab ? 'on' : ''}">${n}</span>`).join('')}</div>` : `<span class="chip on">${lab}</span>`)
+      + (st.guide === 'alta' ? `<span class="hint">${esc(hint)}</span>` : '');
+  } else sb = `<span class="hint mut">${CUR.phase === 'proof' ? 'Fai la prova: quoziente × divisore + resto' : 'Esegui la divisione'}</span>`;
+  $('#stepbar').innerHTML = `<div class="stepbar">${sb}</div>`;
+  // messages / actions
+  let mb = '';
+  if (S.msg) mb += `<div class="msg ${S.msg[0]}">${S.msg[1]}</div>`;
+  if (!S.done && st.errorMode === 'fine') {
+    const all = S.sh.cells.every(c => S.values[c.id] != null);
+    mb += `<p><button class="btn pri big" ${all ? '' : 'disabled'} onclick="checkFine()">✅ Ho finito</button></p>`;
+  }
+  if (S.done) mb += doneActions();
+  $('#msgbox').innerHTML = mb;
+  const sel = paper.querySelector('.sel'); if (sel && sel.scrollIntoView) sel.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+}
+function logErr(S, cell, d) {
+  if (S.logged[cell.id]) return;
+  const t = errType(cell, d); S.logged[cell.id] = t;
+  CUR.errors[t] = (CUR.errors[t] || 0) + 1;
+}
+function nextSel(S) {
+  const i = S.order.indexOf(S.sel), cells = S.sh.cells, f = id => cellDone(S, cells.find(c => c.id === id));
+  for (let k = 1; k <= S.order.length; k++) { const id = S.order[(i + k) % S.order.length]; if (!f(id)) return id; }
+  return null;
+}
+function press(d) {
+  const S = CUR && CUR.S; if (!S || S.done) return;
+  const st = stu(CUR.sid).settings, mode = st.errorMode;
+  if (d === 'next') { const i = S.order.indexOf(S.sel); S.sel = S.order[(i + 1) % S.order.length]; return renderSheet(); }
+  if (!S.sel) return;
+  const cell = S.sh.cells.find(c => c.id === S.sel);
+  if (d === 'del') { delete S.values[cell.id]; delete S.wrong[cell.id]; S.msg = null; return renderSheet(); }
+  S.msg = null;
+  if (mode === 'blocco') {
+    if (d !== cell.val) {
+      logErr(S, cell, d); renderSheet();
+      const el = $(`.in[data-id="${cell.id}"]`); if (el) { el.classList.add('bad', 'sh'); el.textContent = d; setTimeout(() => { el.classList.remove('bad', 'sh'); el.textContent = ''; }, 450); }
+      return;
+    }
+    S.values[cell.id] = d;
+  } else if (mode === 'rosso') {
+    S.values[cell.id] = d;
+    if (d !== cell.val) { logErr(S, cell, d); S.wrong[cell.id] = true; } else delete S.wrong[cell.id];
+  } else S.values[cell.id] = d;
+  S.sel = nextSel(S) || S.sel;
+  if (mode !== 'fine' && S.sh.cells.every(c => S.values[c.id] === c.val)) return complete();
+  if (mode === 'rosso' && S.sh.cells.every(c => S.values[c.id] != null) && Object.keys(S.wrong).length) {
+    S.msg = ['ko', 'Ci sono cifre rosse da correggere: toccale e riscrivile.'];
+    S.sel = S.order.find(id => S.wrong[id]);
+  }
+  renderSheet();
+}
+function checkFine() {
+  const S = CUR.S, bad = S.sh.cells.filter(c => S.values[c.id] !== c.val);
+  if (!bad.length) return complete();
+  bad.forEach(c => logErr(S, c, S.values[c.id]));
+  S.msg = ['ko', CUR.phase === 'proof' ? '🤔 Nella prova c\'è un errore: ricontrolla i calcoli!' : '🤔 C\'è almeno un errore: rivedi la divisione!'];
+  renderSheet();
+}
+function complete() {
+  const S = CUR.S, s = stu(CUR.sid); S.done = true; S.sel = null;
+  if (CUR.phase === 'div') {
+    const perfect = Object.keys(CUR.errors).length === 0, sol = CUR.sol;
+    const rec = { t: Date.now(), D: sol.D, v: sol.v, Q: sol.Q, R: sol.R, method: sol.method, ms: Date.now() - CUR.start, errors: Object.assign({}, CUR.errors), perfect, tools: CUR.tools, proof: null };
+    s.stats.history.push(rec); if (s.stats.history.length > 2000) s.stats.history.shift();
+    CUR.rec = rec;
+    for (const [k, n] of Object.entries(CUR.errors)) s.stats.errors[k] = (s.stats.errors[k] || 0) + n;
+    // tabelline
+    if (sol.v <= 10) sol.steps.forEach((stp, k) => {
+      if (stp.q === 0) return;
+      const key = `${stp.q} × ${sol.v}`, kinds = sol.method === 'lungo' ? ['prod'] : ['rem'];
+      const ko = S.sh.cells.some(c => c.step === k && kinds.includes(c.kind) && S.logged[c.id]);
+      const o = s.stats.tables[key] || (s.stats.tables[key] = { ok: 0, ko: 0 }); ko ? o.ko++ : o.ok++;
+    });
+    const dk = dayKey(); s.stats.days[dk] = (s.stats.days[dk] || 0) + 1;
+    const earned = 1 + (perfect ? 1 : 0); addStars(s, earned);
+    const goalHit = s.stats.days[dk] === s.settings.dailyGoal;
+    S.msg = ['ok', `🎉 Bravo! ${sol.D} : ${sol.v} = <b>${sol.Q}</b>${sol.R ? ` con resto <b>${sol.R}</b>` : ''}. ${perfect ? 'Senza errori! ' : ''}+${earned} ⭐${goalHit ? '<br>🏆 Obiettivo di oggi raggiunto!' : ''}`];
+    save(); confetti();
+  } else {
+    const ok = !Object.keys(S.logged).length;
+    CUR.rec.proof = ok ? 'ok' : 'ko';
+    const pe = Object.keys(S.logged).length;
+    if (pe) s.stats.errors.prova = (s.stats.errors.prova || 0) + pe;
+    addStars(s, 1);
+    S.msg = ['ok', `✔ Il risultato è <b>${CUR.sol.D}</b>, uguale al dividendo: la divisione è giusta! +1 ⭐`];
+    save(); confetti();
+  }
+  render();
+}
+function addStars(s, n) { s.stats.stars += n; s.stats.rewardStars += n; }
+function doneActions() {
+  const st = stu(CUR.sid).settings;
+  if (CUR.phase === 'div' && st.proof) return `<p class="row"><button class="btn grn big" onclick="startProof()">🔍 Fai la prova</button></p>`;
+  return `<p class="row">${CUR.phase === 'div' ? `<button class="btn grn" onclick="startProof()">🔍 Fai la prova</button>` : ''}
+    <button class="btn pri big" onclick="startDiv()">➗ Nuova divisione</button><button class="btn" onclick="CUR=null;go('student',{sid:V.sid})">Basta per ora</button></p>`;
+}
+async function leaveDiv() {
+  if (CUR && !CUR.S.done && Object.keys(CUR.S.values).length) {
+    if (!await confirmBox('Vuoi uscire?', 'La divisione non è finita e non verrà salvata.', 'Esci', 'pri')) return;
+  }
+  if (CUR && CUR.phase === 'proof' && !CUR.S.done && stu(CUR.sid).settings.proof) { /* prova abbandonata */ }
+  CUR = null; go('student', { sid: V.sid });
+}
+
+/* ================= TOOLS ================= */
+function openTool(t) {
+  TOOLS.open = t; if (CUR) CUR.tools[t]++;
+  drawTools();
+}
+function drawTools() {
+  let el = $('#toolsLayer'); if (!el) { el = document.createElement('div'); el.id = 'toolsLayer'; document.body.appendChild(el); }
+  if (!TOOLS.open) { el.innerHTML = ''; return; }
+  const st = CUR ? stu(CUR.sid).settings : DEF_SETTINGS, t = TOOLS.open;
+  let grid = '';
+  if (t === 'pit') {
+    for (let i = 1; i <= 10; i++) for (let j = 1; j <= 10; j++) { const k = i + '-' + j; grid += `<button class="${TOOLS.pit.has(k) ? 'on' : (i === 1 || j === 1 ? 'h1' : '')}" onclick="toolTap('pit','${k}')">${i * j}</button>`; }
+  } else {
+    for (let n = 0; n < 100; n++) grid += `<button class="${TOOLS.tab.has(n) ? 'on' : ''}" onclick="toolTap('tab',${n})">${n}</button>`;
+  }
+  el.innerHTML = `<div class="tools-bg" onclick="if(event.target===this){TOOLS.open=null;drawTools()}"><div class="tools">
+    <div class="row"><div class="seg">${st.toolPit ? `<button class="${t === 'pit' ? 'on' : ''}" onclick="TOOLS.open='pit';drawTools()">Tavola pitagorica</button>` : ''}${st.toolTab ? `<button class="${t === 'tab' ? 'on' : ''}" onclick="TOOLS.open='tab';drawTools()">Tabella 0–99</button>` : ''}</div><span class="sp"></span>
+    <button class="btn ghost" onclick="TOOLS.open=null;drawTools()">✕</button></div>
+    ${t === 'tab' && st.tabMode === 'multipli' ? '<div class="help">Tocca un numero per vedere i suoi multipli.</div>' : ''}
+    <div class="ttab">${grid}</div>
+    <button class="btn acc" style="width:100%" onclick="toolClear()">🧽 Togli tutte le evidenziazioni</button></div></div>`;
+}
+function toolTap(t, k) {
+  const st = CUR ? stu(CUR.sid).settings : DEF_SETTINGS;
+  if (t === 'pit') { TOOLS.pit.has(k) ? TOOLS.pit.delete(k) : TOOLS.pit.add(k); }
+  else if (st.tabMode === 'multipli') {
+    if (k === 0) return;
+    if (TOOLS.base === k) { TOOLS.tab.clear(); TOOLS.base = null; }
+    else { TOOLS.tab.clear(); for (let m = k; m < 100; m += k) TOOLS.tab.add(m); TOOLS.base = k; }
+  } else { TOOLS.tab.has(k) ? TOOLS.tab.delete(k) : TOOLS.tab.add(k); }
+  drawTools();
+}
+function toolClear() { if (TOOLS.open === 'pit') TOOLS.pit.clear(); else { TOOLS.tab.clear(); TOOLS.base = null; } drawTools(); }
+
+/* ================= WARM-UP ================= */
+let W = null;
+function startWarm() {
+  const s = stu(V.sid), st = s.settings;
+  const base = st.divisorType === 'uno' ? st.divisors : [2, 3, 4, 5, 6, 7, 8, 9];
+  W = { sid: s.id, base, left: 60, correct: 0, total: 0, ans: '', q: null, fb: null, over: false };
+  newWarmQ(); go('warm', { sid: s.id });
+  warmTimer = setInterval(() => { W.left--; if (W.left <= 0) endWarm(); else { const t = $('#wt'); if (t) t.textContent = W.left; } }, 1000);
+}
+function newWarmQ() { W.q = [rnd(1, 10), pick(W.base)]; W.ans = ''; }
+function warmView() {
+  if (!W) return studentView();
+  if (W.over) return `<div class="card" style="text-align:center;max-width:480px;margin:20px auto">${mascotSVG()}<h1>Tempo scaduto!</h1>
+    <p style="font-size:1.4rem">Hai risposto giusto a <b>${W.correct}</b> su <b>${W.total}</b></p>${W.correct >= 8 ? '<p>Fantastico! +1 ⭐</p>' : ''}
+    <div class="grid"><button class="btn pri big" onclick="startDiv()">➗ Ora una divisione!</button><button class="btn" onclick="go('student',{sid:V.sid})">Torna indietro</button></div></div>`;
+  return `<div class="topbar"><button class="btn ghost" onclick="W=null;go('student',{sid:V.sid})">← Esci</button><span class="sp"></span><span class="pill">⏱️ <span id="wt">${W.left}</span>s</span><span class="pill">✔ ${W.correct}</span></div>
+  <div style="max-width:420px;margin:0 auto" class="grid">
+    <div class="warm-q">${W.q[0]} × ${W.q[1]} = ?</div>
+    <div class="warm-a" style="${W.fb === 'ok' ? 'background:#DDF7EA' : W.fb ? 'background:#FFE7E8' : ''}">${W.fb && W.fb !== 'ok' ? `<span style="color:var(--red)">${W.fb}</span>` : esc(W.ans) || '&nbsp;'}</div>
+    <div class="numpad">${[1, 2, 3, 4, 5, 6, 7, 8, 9].map(d => `<button onclick="warmKey('${d}')">${d}</button>`).join('')}<button class="ctl" onclick="warmKey('del')">⌫</button><button onclick="warmKey('0')">0</button><button class="ctl" style="background:var(--grn);color:#fff" onclick="warmKey('ok')">OK</button></div>
+  </div>`;
+}
+function warmKey(k) {
+  if (!W || W.over || W.fb) return;
+  if (k === 'del') W.ans = W.ans.slice(0, -1);
+  else if (k === 'ok') {
+    if (!W.ans) return;
+    const [a, b] = W.q, ok = +W.ans === a * b, s = stu(W.sid), key = `${a} × ${b}`;
+    const o = s.stats.tables[key] || (s.stats.tables[key] = { ok: 0, ko: 0 }); ok ? o.ok++ : o.ko++;
+    W.total++; if (ok) W.correct++;
+    W.fb = ok ? 'ok' : `${a} × ${b} = ${a * b}`;
+    render();
+    setTimeout(() => { if (!W || W.over) return; W.fb = null; newWarmQ(); render(); }, ok ? 350 : 1400);
+    return;
+  } else if (W.ans.length < 3) W.ans += k;
+  render();
+}
+function endWarm() {
+  clearInterval(warmTimer); warmTimer = null;
+  const s = stu(W.sid); W.over = true;
+  s.stats.warmups.push({ t: Date.now(), correct: W.correct, total: W.total }); if (s.stats.warmups.length > 200) s.stats.warmups.shift();
+  if (W.correct >= 8) { addStars(s, 1); confetti(); }
+  save(); render();
+}
+
+/* ================= INIT ================= */
+render();
+if ('serviceWorker' in navigator && location.protocol === 'https:') {
+  try { navigator.serviceWorker.register('sw.js').catch(() => {}); } catch (e) {}
+}
+</script>
+</body>
+</html>
