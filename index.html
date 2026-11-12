@@ -146,6 +146,10 @@ body.easy .sheet{font-family:Verdana,sans-serif}
 .bars{display:flex;align-items:flex-end;gap:5px;height:120px;padding-top:6px}
 .bars div{flex:1;background:var(--pri2);border-radius:6px 6px 0 0;position:relative;min-height:2px}
 .bars div span{position:absolute;bottom:-20px;left:50%;transform:translateX(-50%);font-size:11px;color:var(--mut)}
+.tbars{height:150px}
+.tbars div{background:var(--pri)}
+.tbars div.empty{background:repeating-linear-gradient(45deg,#eee 0 4px,#f7f7f7 4px 8px);height:4px}
+.tbars div em{position:absolute;top:-18px;left:50%;transform:translateX(-50%);font-style:normal;font-size:10px;font-weight:700;color:var(--ink);white-space:nowrap}
 .hbar{display:flex;align-items:center;gap:8px;margin:6px 0}
 .hbar .lab{width:200px;font-size:.9em}
 .hbar .tr{flex:1;height:14px;background:#F2EEFF;border-radius:99px;overflow:hidden}
@@ -617,9 +621,6 @@ function statsView() {
   const proofs = h.filter(x => x.proof);
   const errs = s.stats.errors, maxE = Math.max(1, ...Object.values(errs));
   const tabs = Object.entries(s.stats.tables).map(([k, o]) => ({ k, ...o, rate: o.ko / (o.ok + o.ko) })).filter(x => x.ko > 0).sort((a, b) => b.rate - a.rate || b.ko - a.ko).slice(0, 8);
-  const days = []; const d = new Date(); d.setDate(d.getDate() - 13);
-  for (let i = 0; i < 14; i++) { days.push([d.getDate(), s.stats.days[dayKey(d)] || 0]); d.setDate(d.getDate() + 1); }
-  const maxD = Math.max(1, ...days.map(x => x[1]));
   const w = s.stats.warmups.slice(-5);
   return `<div class="topbar"><button class="btn ghost noprint" onclick="go('parent')">← Indietro</button>${avatarHTML(s, 48)}<h2>Statistiche di ${esc(s.name)}</h2><span class="sp"></span><button class="btn noprint" onclick="try{window.print()}catch(e){toast('Stampa non disponibile qui')}">🖨️ Report PDF</button></div>
   <div class="kpis">
@@ -632,13 +633,92 @@ function statsView() {
     <div class="kpi"><b>${N ? Math.round(withTool / N * 100) : 0}%</b>con strumenti</div>
     <div class="kpi"><b>${proofs.length ? Math.round(proofs.filter(x => x.proof === 'ok').length / proofs.length * 100) + '%' : '–'}</b>prove riuscite</div>
   </div>
-  <div class="card sect"><h3>Ultimi 14 giorni</h3><div class="bars" style="margin-bottom:24px">${days.map(([dd, c]) => `<div style="height:${c / maxD * 100}%" title="${c}"><span>${dd}</span></div>`).join('')}</div></div>
-  <div class="card sect"><h3>Tipi di errore</h3>${Object.keys(ERR_LABELS).map(k => `<div class="hbar"><span class="lab">${ERR_LABELS[k]}</span><span class="tr"><i style="width:${(errs[k] || 0) / maxE * 100}%"></i></span><b>${errs[k] || 0}</b></div>`).join('')}</div>
+  ${trendCard(s)}
+  <div class="card sect"><h3>Tipi di errore (totale)</h3>${Object.keys(ERR_LABELS).map(k => `<div class="hbar"><span class="lab">${ERR_LABELS[k]}</span><span class="tr"><i style="width:${(errs[k] || 0) / maxE * 100}%"></i></span><b>${errs[k] || 0}</b></div>`).join('')}</div>
   <div class="card sect"><h3>Tabelline da ripassare</h3>${tabs.length ? tabs.map(t => `<div class="hbar"><span class="lab">${t.k}</span><span class="tr"><i style="width:${t.rate * 100}%;background:var(--red)"></i></span><b>${t.ko}/${t.ok + t.ko}</b></div>`).join('') : '<p class="mut">Nessuna tabellina critica, per ora.</p>'}
     ${w.length ? `<p class="mut small">Riscaldamenti recenti: ${w.map(x => `${x.correct}/${x.total}`).join(' · ')}</p>` : ''}</div>
   <div class="card sect"><h3>Ultime divisioni</h3>${N ? `<div style="overflow-x:auto"><table class="hist"><tr><th>Data</th><th>Divisione</th><th>Metodo</th><th>Tempo</th><th>Errori</th><th>Prova</th></tr>
     ${h.slice(-15).reverse().map(x => { const ne = Object.values(x.errors).reduce((a, b) => a + b, 0); return `<tr><td>${new Date(x.t).toLocaleDateString('it-IT')}</td><td>${x.D} : ${x.v} = ${x.Q}${x.R ? ' r ' + x.R : ''}</td><td>${x.method}</td><td>${Math.round(x.ms / 1000)}s</td><td>${ne ? ne : '✔'}</td><td>${x.proof === 'ok' ? '✔' : x.proof === 'ko' ? '✗' : '–'}</td></tr>`; }).join('')}</table></div>` : '<p class="mut">Ancora nessuna divisione.</p>'}</div>`;
 }
+
+
+/* ---- trend per periodo ---- */
+const MESI = ['gen', 'feb', 'mar', 'apr', 'mag', 'giu', 'lug', 'ago', 'set', 'ott', 'nov', 'dic'];
+const PERIODS = { g: { n: 14, lab: 'Giorno' }, s: { n: 12, lab: 'Settimana' }, m: { n: 12, lab: 'Mese' } };
+const METRICS = {
+  perf: { lab: '% senza errori', better: 'up', fmt: v => Math.round(v) + '%' },
+  epd: { lab: 'Errori per divisione', better: 'down', fmt: v => v.toFixed(1) },
+  time: { lab: 'Tempo medio', better: 'down', fmt: v => Math.floor(v / 60) + ':' + String(Math.round(v % 60)).padStart(2, '0') },
+  n: { lab: 'Divisioni fatte', better: 'up', fmt: v => String(v) }
+};
+Object.keys(ERR_LABELS).forEach(k => METRICS['e_' + k] = { lab: ERR_LABELS[k] + ' (per divisione)', better: 'down', fmt: v => v.toFixed(2) });
+function weekStart(d) { const x = new Date(d.getFullYear(), d.getMonth(), d.getDate()); x.setDate(x.getDate() - (x.getDay() + 6) % 7); return x; }
+function bucketKey(t, per) {
+  const d = new Date(t);
+  if (per === 'g') return dayKey(d);
+  if (per === 's') return dayKey(weekStart(d));
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+}
+function bucketList(per) {
+  const out = [], now = new Date(), N = PERIODS[per].n;
+  for (let i = N - 1; i >= 0; i--) {
+    let d;
+    if (per === 'g') { d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i); out.push({ key: dayKey(d), lab: String(d.getDate()), long: d.toLocaleDateString('it-IT', { weekday: 'short', day: 'numeric', month: 'short' }) }); }
+    else if (per === 's') { d = weekStart(now); d.setDate(d.getDate() - 7 * i); const e = new Date(d); e.setDate(e.getDate() + 6); out.push({ key: dayKey(d), lab: d.getDate() + '/' + (d.getMonth() + 1), long: `${d.getDate()}/${d.getMonth() + 1} – ${e.getDate()}/${e.getMonth() + 1}` }); }
+    else { d = new Date(now.getFullYear(), now.getMonth() - i, 1); out.push({ key: d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'), lab: MESI[d.getMonth()], long: MESI[d.getMonth()] + ' ' + d.getFullYear() }); }
+  }
+  return out;
+}
+function aggregate(s, per) {
+  const list = bucketList(per), map = {};
+  list.forEach(b => map[b.key] = Object.assign(b, { n: 0, perfect: 0, errs: 0, ms: 0, types: {} }));
+  for (const h of s.stats.history) {
+    const b = map[bucketKey(h.t, per)]; if (!b) continue;
+    b.n++; if (h.perfect) b.perfect++; b.ms += h.ms;
+    for (const [k, c] of Object.entries(h.errors)) { b.errs += c; b.types[k] = (b.types[k] || 0) + c; }
+    if (h.proof === 'ko') { b.types.prova = (b.types.prova || 0) + (h.proofErr || 1); }
+  }
+  return list;
+}
+function metricVal(b, m) {
+  if (m === 'n') return b.n;
+  if (!b.n) return null;
+  if (m === 'perf') return b.perfect / b.n * 100;
+  if (m === 'epd') return b.errs / b.n;
+  if (m === 'time') return b.ms / b.n / 1000;
+  return (b.types[m.slice(2)] || 0) / b.n;
+}
+function setStat(k, v) { V[k] = v; const y = window.scrollY; render(); window.scrollTo(0, y); }
+function trendCard(s) {
+  const per = V.per || 'g', met = V.met || 'perf', M = METRICS[met];
+  const list = aggregate(s, per), vals = list.map(b => metricVal(b, met));
+  const max = Math.max(met === 'perf' ? 100 : 0, ...vals.filter(v => v != null)) || 1;
+  const filled = list.filter((b, i) => vals[i] != null && (met !== 'n' || b.n > 0));
+  let verdict = '<span class="mut">Servono almeno due periodi con divisioni per vedere l\'andamento.</span>';
+  if (filled.length >= 2) {
+    const a = metricVal(filled[filled.length - 2], met), b = metricVal(filled[filled.length - 1], met);
+    const diff = b - a, tol = Math.max(Math.abs(a) * 0.05, met === 'perf' ? 2 : 0.01);
+    const good = M.better === 'up' ? diff > tol : diff < -tol, bad = M.better === 'up' ? diff < -tol : diff > tol;
+    verdict = `${good ? '<b style="color:var(--grn)">📈 In miglioramento</b>' : bad ? '<b style="color:var(--red)">📉 In peggioramento</b>' : '<b>➖ Stabile</b>'}
+      <span class="mut small"> · ${filled[filled.length - 2].long}: ${M.fmt(a)} → ${filled[filled.length - 1].long}: ${M.fmt(b)}</span>`;
+  }
+  const typeKeys = Object.keys(ERR_LABELS);
+  const rows = list.slice().reverse().filter(b => b.n > 0);
+  return `<div class="card sect"><h3>Andamento nel tempo</h3>
+    <div class="seg noprint">${Object.entries(PERIODS).map(([k, p]) => `<button class="${per === k ? 'on' : ''}" onclick="setStat('per','${k}')">${p.lab}</button>`).join('')}</div>
+    <label class="f noprint">Cosa vuoi vedere</label>
+    <select class="inp noprint" onchange="setStat('met',this.value)">${Object.entries(METRICS).map(([k, m]) => `<option value="${k}" ${k === met ? 'selected' : ''}>${m.lab}</option>`).join('')}</select>
+    <p style="margin:12px 0 4px"><b>${M.lab}</b> per ${PERIODS[per].lab.toLowerCase()} ${M.better === 'down' ? '<span class="mut small">(più basso è meglio)</span>' : ''}</p>
+    <div class="bars tbars" style="margin-bottom:26px">${list.map((b, i) => { const v = vals[i];
+      return v == null || (met === 'n' && !b.n) ? `<div class="empty" title="${b.long}: nessuna divisione"><span>${b.lab}</span></div>`
+        : `<div style="height:${Math.max(3, v / max * 100)}%" title="${b.long}: ${M.fmt(v)}"><em>${M.fmt(v)}</em><span>${b.lab}</span></div>`; }).join('')}</div>
+    <p>${verdict}</p>
+    ${rows.length ? `<div style="overflow-x:auto"><table class="hist"><tr><th>Periodo</th><th>Div.</th><th>Senza errori</th><th>Errori/div.</th><th>Tempo medio</th>${typeKeys.map(k => `<th title="${ERR_LABELS[k]}">${ERR_SHORT[k]}</th>`).join('')}</tr>
+      ${rows.map(b => `<tr><td>${b.long}</td><td>${b.n}</td><td>${METRICS.perf.fmt(metricVal(b, 'perf'))}</td><td>${METRICS.epd.fmt(metricVal(b, 'epd'))}</td><td>${METRICS.time.fmt(metricVal(b, 'time'))}</td>${typeKeys.map(k => `<td>${b.types[k] || 0}</td>`).join('')}</tr>`).join('')}</table></div>
+      <p class="help">Legenda: ${typeKeys.map(k => `<b>${ERR_SHORT[k]}</b> ${ERR_LABELS[k].toLowerCase()}`).join(' · ')}</p>` : '<p class="mut">Nessuna divisione in questo intervallo.</p>'}
+  </div>`;
+}
+const ERR_SHORT = { qAlto: 'Q↑', qBasso: 'Q↓', zero: '0', tab: '×', sott: '−', abb: '↓', prova: 'Prova' };
 
 /* ---- data ---- */
 function dataView() {
@@ -883,7 +963,7 @@ function complete() {
   } else {
     const ok = !Object.keys(S.logged).length;
     CUR.rec.proof = ok ? 'ok' : 'ko';
-    const pe = Object.keys(S.logged).length;
+    const pe = Object.keys(S.logged).length; CUR.rec.proofErr = pe;
     if (pe) s.stats.errors.prova = (s.stats.errors.prova || 0) + pe;
     addStars(s, 1);
     S.msg = ['ok', `✔ Il risultato è <b>${CUR.sol.D}</b>, uguale al dividendo: la divisione è giusta! +1 ⭐`];
